@@ -13,11 +13,13 @@ def main(stdscr):
     curses.init_pair(2, curses.COLOR_YELLOW, curses.COLOR_BLACK)
     curses.init_pair(3, curses.COLOR_GREEN, curses.COLOR_BLACK)
     curses.init_pair(4, curses.COLOR_RED, curses.COLOR_BLACK)
+    curses.init_pair(5, curses.COLOR_CYAN, curses.COLOR_BLACK)
     COLOR_CYAN_BLACK = curses.color_pair(1)
     COLOR_YELLOW_BLACK = curses.color_pair(2)
     COLOR_GREEN_BLACK = curses.color_pair(3)
     COLOR_RED_BLACK = curses.color_pair(4)
-
+    COLOR_CYAN_BLACK = curses.color_pair(5)
+    
     # Opciones del menú
     menu_items = ["1. Monitorización",
                   "2. Inyectar Payload",
@@ -63,8 +65,8 @@ def main(stdscr):
                 while True:
                     stdscr.clear()
                     stdscr.addstr(1, 2, "Monitorización de Tráfico CAN Bus", curses.A_BOLD)
-                    stdscr.addstr(3, 2, "¿Deseas almacenar el tráfico? (Sí/No)", curses.A_BOLD)
-                    stdscr.addstr(4, 2, "Seleccione una opción:", curses.A_BOLD)
+                    stdscr.addstr(3, 2, "¿Deseas almacenar el tráfico? (Sí/No)", COLOR_CYAN_BLACK)
+                    stdscr.addstr(4, 2, "Seleccione una opción:", COLOR_CYAN_BLACK)
                     
                     if monitorizar_option == "Sí":
                         stdscr.addstr(5, 4, "[X] Sí", COLOR_GREEN_BLACK)
