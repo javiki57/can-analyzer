@@ -27,9 +27,11 @@ def main(stdscr):
     
     # Opciones del menú
     menu_items = ["1. Monitorización",
-                  "2. Inyectar Payload",
-                  "3. Modificar Payload",
-                  "4. Salir"]
+                  "2. Inyectar archivo",
+                  "3. Inyectar trama",
+                  "4. Modificar archivo",
+                  "5. Modificar trama",
+                  "6. Salir"]
     
     current_row = 4
     option = 0
@@ -152,8 +154,15 @@ def main(stdscr):
             elif option == 2:
                 # Lógica para la opción 3 (Modificar Payload)
                 pass  # Implementar la funcionalidad
+
             elif option == 3:
-                break  # Salir
+            	pass # Implementar funcionalidad
+
+            elif option == 4:
+                pass
+
+            elif option == 5:
+            	break
         
         stdscr.refresh()
 
