@@ -1,6 +1,8 @@
 import sys
 import curses
 import signal
+import database
+import vcan_reader
 
 def def_handler(sig, frame):
     sys.exit(1)
@@ -74,7 +76,7 @@ def main(stdscr):
                 while True:
                     stdscr.clear()
                     stdscr.addstr(1, 2, "Monitorización de Tráfico CAN Bus", curses.A_BOLD)
-                    stdscr.addstr(4, 2, "¿Deseas almacenar el tráfico?", COLOR_CYAN_BLACK)
+                    stdscr.addstr(4, 2, "¿Deseas almacenar el tráfico en un archivo CSV?", COLOR_CYAN_BLACK)
                     stdscr.addstr(6, 2, "Seleccione una opción:", COLOR_CYAN_BLACK)
                     
                     if monitorizar_option == "Sí":
@@ -96,18 +98,61 @@ def main(stdscr):
                             monitorizar_option = "Sí"
 
                     elif choice == ord('\n'):  # Confirmar la selección
+
                         if monitorizar_option == "Sí":
-                            # Lógica para almacenar el tráfico (implementar esta parte)
-                            pass
+                            stdscr.clear()
+                            stdscr.addstr(1, 2, "Monitorización de Tráfico CAN Bus", curses.A_BOLD)
+                            stdscr.addstr(4, 2, "Introduce el nombre del archivo CSV para guardar las tramas:", COLOR_CYAN_BLACK)
+                            stdscr.addstr(6, 2, "Nombre del archivo:", COLOR_CYAN_BLACK)
+                            stdscr.addstr(7, 2, ruta_archivo)
+                            stdscr.refresh()
+                            curses.curs_set(1)  # Mostrar el cursor para ingresar el nombre del archivo
+                            
+                            while True:
+                                ch = stdscr.getch()
+
+                                if ch == 27:  # Tecla 'Esc' para volver al menú principal
+                                    curses.curs_set(0)  # Ocultar el cursor
+                                    break
+
+                                elif ch == 10:  # Tecla 'Enter' para confirmar el nombre del archivo
+                                    # Aquí se almacena el nombre del archivo y se comienza a capturar tramas
+                                    nombre_archivo = ruta_archivo.strip() + ".csv"
+                                    stdscr.addstr(9, 2, "Nombre del archivo CSV:", COLOR_YELLOW_BLACK)
+                                    stdscr.addstr(10, 2, nombre_archivo)
+                                    stdscr.refresh()
+                                    curses.curs_set(0)  # Ocultar el cursor
+                                    break
+    
+                                elif ch == 8:  # Tecla 'Backspace' para borrar caracteres
+                                    ruta_archivo = ruta_archivo[:-1]
+                                    stdscr.move(7, 2)  # Mover el cursor a la posición correcta
+                                    stdscr.clrtoeol()  # Borrar la línea actual desde la posición del cursor
+                                    stdscr.addstr(7, 2, ruta_archivo)  # Actualizar visualmente la ruta
+
+                                elif 0 <= ch <= 255:
+                                    ruta_archivo += chr(ch)
+                                    stdscr.addstr(7, 2, ruta_archivo)
+                                    stdscr.refresh()
+
+                            # Comenzar a capturar tramas y guardarlas en el archivo CSV
+                            try:
+                                #crear_database()
+                                #tramas = iniciar_monitorizacion()
+                                #insertar_tramas(tramas)
+                            except Exception as e:
+                                stdscr.addstr(12, 2, f"Error al capturar tramas: {str(e)}", COLOR_RED_BLACK)
+                                stdscr.refresh()
+                                curses.napms(2000)  # Esperar 2 segundos antes de volver al menú principal
+                        
+
                         elif monitorizar_option == "No":
-                        	# Lógica para monitorear el tráfico (implementar esta parte)
+                            # Lógica para monitorear el tráfico (implementar esta parte)
                             pass
                             
                     elif choice == 27:
                         break #Tecla Esc para volver atrás
 
-                # Lógica para la opción 1 (Monitorización)
-                # Implementar la funcionalidad
             elif option == 1:
 
                 # Ingresar en la opción "Inyectar Payload"
