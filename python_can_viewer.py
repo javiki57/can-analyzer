@@ -8,7 +8,6 @@ import os
 import six
 import struct
 import sys
-import curses
 
 from curses.ascii import ESC as KEY_ESC, SP as KEY_SPACE
 from typing import Dict, List, Tuple, Union
@@ -336,9 +335,8 @@ class CanViewer:
         self.draw_line(0, 35, 'ID', curses.color_pair(1))
         self.draw_line(0, 43, 'Tam', curses.color_pair(1))
         self.draw_line(0, 52, 'Datos', curses.color_pair(1))
-        if not self.ignore_canopen:
-            self.draw_line(0, 77, 'Función', curses.color_pair(1))
-            self.draw_line(0, 87, 'ID Nodo', curses.color_pair(1))
+        self.draw_line(0, 77, 'Función', curses.color_pair(1))
+        self.draw_line(0, 87, 'ID Nodo', curses.color_pair(1))
 
     def redraw_screen(self):
         # Trigger a complete redraw
@@ -409,12 +407,8 @@ def parse_args(args):
 
 
     optional.add_argument('-f', '--filter', help='''R|Comma separated CAN filters for the given CAN interface: \
-                          \n      <can_id>:<can_mask> (matches when <received_can_id> & mask == can_id & mask) \
-                          \n      <can_id>~<can_mask> (matches when <received_can_id> & mask != can_id & mask) \
-                          \nFx to show only frames with ID 0x100 to 0x103: \
-                          \n      python -m python_can_viewer -f 100:7FC \
-                          \nNote that the ID and mask are alway interpreted as hex values''',
-                          metavar='{<can_id>:<can_mask>,<can_id>~<can_mask>}', nargs=argparse.ONE_OR_MORE, default='')
+                          ''',
+                          metavar='{<can_id>,<can_id>', nargs=argparse.ONE_OR_MORE, default='')
 
     optional.add_argument('-i', '--interface', dest='interface',
                           help='''R|Specify the backend CAN interface to use. (default: "socketcan")''',
@@ -430,26 +424,6 @@ def parse_args(args):
             can_mask = 0x7FF  # Máscara fija en 0x7FF
             can_filters.append({'can_id': can_id, 'can_mask': can_mask})
 
-
-    # Dictionary used to convert between Python values and C structs represented as Python strings.
-    # If the value is 'None' then the message does not contain any data package.
-    #
-    # The struct package is used to unpack the received data.
-    # Note the data is assumed to be in little-endian byte order.
-    # < = little-endian, > = big-endian
-    # x = pad byte
-    # c = char
-    # ? = bool
-    # b = int8_t, B = uint8_t
-    # h = int16, H = uint16
-    # l = int32_t, L = uint32_t
-    # q = int64_t, Q = uint64_t
-    # f = float (32-bits), d = double (64-bits)
-    #
-    # An optional conversion from real units to integers can be given as additional arguments.
-    # In order to convert from raw integer value the real units are multiplied with the values and similarly the values
-    # are divided by the value in order to convert from real units to raw integer values.
-
     return parsed_args, can_filters
 
 
@@ -461,8 +435,6 @@ def main():  # pragma: no cover
         config['can_filters'] = can_filters
     if parsed_args.interface:
         config['interface'] = parsed_args.interface
-#    if parsed_args.bitrate:
-        #        config['bitrate'] = parsed_args.bitrate
 
     # Create a CAN-Bus interface
     bus = can.interface.Bus(parsed_args.channel, **config)
