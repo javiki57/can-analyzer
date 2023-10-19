@@ -108,11 +108,11 @@ def main(stdscr):
                             stdscr.addstr(6, 2, "Nombre del archivo:", COLOR_CYAN_BLACK)
                             stdscr.addstr(7, 2, ruta_archivo)
                             stdscr.refresh()
-                            curses.curs_set(1)  # Mostrar el cursor para ingresar el nombre del archivo
-                            
+                            curses.curs_set(1)  # Mostrar el cursor para ingresar el nombre del archivo            
+
                             while True:
                                 ch = stdscr.getch()
-
+    
                                 if ch == 27:  # Tecla 'Esc' para volver al menú principal
                                     curses.curs_set(0)  # Ocultar el cursor
                                     break
@@ -120,125 +120,8 @@ def main(stdscr):
                                 elif ch == 10:  # Tecla 'Enter' para confirmar el nombre del archivo
                                     # Aquí se almacena el nombre del archivo y se comienza a capturar tramas
                                     nombre_archivo = ruta_archivo.strip() + ".csv"
-                                    stdscr.addstr(9, 2, "¿Qué interfaz vas a utilizar? (Por defecto vcan0):", COLOR_CYAN_BLACK)
-                                    stdscr.addstr(10, 2, "Interfaz:", COLOR_CYAN_BLACK)
-                                    curses.curs_set(1)
-                                    interfaz_input = ""
-
-                                    while True:
-                                        ch = stdscr.getch()
-                                        if ch == 27:  # Tecla 'Esc' para volver al menú principal
-                                            curses.curs_set(0)  # Ocultar el cursor
-                                            break
-                                        
-                                        elif ch == 10:  # Tecla 'Enter' para confirmar la interfaz
-                                            interfaz = interfaz_input.strip() or "vcan0"  # Usar vcan0 si no se especifica otra interfaz
-                                            stdscr.addstr(7, 2, "Interfaz seleccionada:", COLOR_YELLOW_BLACK)
-                                            stdscr.addstr(8, 2, interfaz)
-                                            stdscr.refresh()
-                                            curses.curs_set(0)  # Ocultar el cursor
-                                            break
-
-                                        elif ch == curses.KEY_BACKSPACE:  # Tecla 'Backspace' para borrar caracteres
-                                            interfaz_input = interfaz_input[:-1]
-                                            stdscr.move(10, 12)  # Mover el cursor a la posición correcta
-                                            stdscr.clrtoeol()  # Borrar la línea actual desde la posición del cursor
-                                            stdscr.addstr(10, 12, interfaz_input)  # Actualizar visualmente la interfaz
-                                
-                                        elif 0 <= ch <= 255:
-                                            interfaz_input += chr(ch)
-                                            stdscr.addstr(10, 12, interfaz_input)
-                                            stdscr.refresh()
-
-
-                                    stdscr.clear()
-                                    stdscr.addstr(1, 2, "Monitorización de Tráfico CAN Bus", curses.A_BOLD)
-                                    stdscr.addstr(4, 2, "¿Deseas filtrar por IDs? ", COLOR_CYAN_BLACK)
                                     
-                                    filtrar_ids_option = "No" # Valor predeterminado
 
-                                    while True:
-                                        if filtrar_ids_option == "Sí":
-                                            stdscr.addstr(6, 4, "[X] Sí", COLOR_GREEN_BLACK)
-                                            stdscr.addstr(7, 4, "[ ] No", COLOR_RED_BLACK)
-                                        else:
-                                            stdscr.addstr(6, 4, "[ ] Sí", COLOR_GREEN_BLACK)
-                                            stdscr.addstr(7, 4, "[X] No", COLOR_RED_BLACK)
-                                
-                                        stdscr.refresh()
-
-                                        choice = stdscr.getch()
-                                        if choice == curses.KEY_UP or choice == curses.KEY_DOWN:
-                                            # Cambiar la selección entre "Sí" y "No"
-                                            filtrar_ids_option = "No" if filtrar_ids_option == "Sí" else "Sí"
-
-                                        elif choice == ord('\n'):  # Confirmar la selección
-                                            if filtrar_ids_option == "Sí":
-                                                filtrar_ids = True
-                                            break
-
-                                        elif choice == 27:  # Tecla 'Esc' para volver al menú principal
-                                            break
-
-                                    # Ejecutar python_can_viewer.py con los parámetros
-                                    stdscr.clear()
-                                    stdscr.refresh()
-
-                                    try:
-                                        command = ["python3", "python_can_viewer.py"]
-
-                                        if interfaz:
-                                           command += ["-c", interfaz]
-
-                                        if filtrar_ids:
-                                            # Preguntar por los IDs a filtrar
-                                            stdscr.clear()
-                                            stdscr.addstr(1, 2, "Monitorización de Tráfico CAN Bus", curses.A_BOLD)
-                                            stdscr.addstr(4, 2, "Introduce los IDs a filtrar (separados por comas):", COLOR_CYAN_BLACK)
-                                        
-                                            curses.curs_set(1)  # Mostrar el cursor para ingresar los IDs
-                                            ids_input = ""
-
-                                            while True:
-                                                ch = stdscr.getch()
-                                        
-                                                if ch == 27:  # Tecla 'Esc' para volver al menú principal
-                                                    curses.curs_set(0)  # Ocultar el cursor
-                                                    break
-                                                elif ch == 10:  # Tecla 'Enter' para confirmar los IDs
-                                                    ids = ids_input.strip()
-                                                    ids_filter = ids.split(',')
-                                                    if ids:
-                                                        command += ["-f"]
-                                                        for id in ids_filter:
-                                                            command.extend([id])
-                                                        #command += ["-f", ids_filter]
-                                                    stdscr.refresh()
-                                                    curses.curs_set(0)  # Ocultar el cursor
-                                                    
-                                                    try:
-                                                        subprocess.run(command, check=True)
-                                                    except subprocess.CalledProcessError as e:
-                                                        stdscr.addstr(10, 2, f"Error al ejecutar python_can_viewer.py: {str(e)}", COLOR_RED_BLACK)
-                                                        stdscr.refresh()
-                                                        curses.napms(2000)  # Esperar 2 segundos antes de volver al menú principal
-                                                    break
-                                                    
-                                                elif ch == curses.KEY_BACKSPACE:  # Tecla 'Backspace' para borrar caracteres
-                                                    ids_input = ids_input[:-1]
-                                                    stdscr.move(6, 2)  # Mover el cursor a la posición correcta
-                                                    stdscr.clrtoeol()  # Borrar la línea actual desde la posición del cursor
-                                                    stdscr.addstr(6, 2, ids_input)  # Actualizar visualmente los IDs
-                                                elif 0 <= ch <= 255:
-                                                    ids_input += chr(ch)
-                                                    stdscr.addstr(6, 2, ids_input)
-                                                    stdscr.refresh()
-                                    except Exception as e:
-                                        stdscr.addstr(9, 2, f"Error al ingresar los IDs a filtrar: {str(e)}", COLOR_RED_BLACK)
-                                        stdscr.refresh()
-                                        curses.napms(2000)  # Esperar 2 segundos antes de volver al menú principal
-                                        
-    
                                 elif ch == curses.KEY_BACKSPACE:  # Tecla 'Backspace' para borrar caracteres
                                     ruta_archivo = ruta_archivo[:-1]
                                     stdscr.move(7, 2)  # Mover el cursor a la posición correcta
@@ -250,11 +133,128 @@ def main(stdscr):
                                     stdscr.addstr(7, 2, ruta_archivo)
                                     stdscr.refresh()
 
-                        
+                        stdscr.addstr(11, 2, "¿Qué interfaz vas a utilizar? (Por defecto vcan0):", COLOR_CYAN_BLACK)
+                        stdscr.addstr(12, 2, "Interfaz:", COLOR_CYAN_BLACK)
+                        curses.curs_set(1)
+                        interfaz_input = ""
 
-                        elif monitorizar_option == "No":
+                        while True:
+                            ch = stdscr.getch()
+                            if ch == 27:  # Tecla 'Esc' para volver al menú principal
+                                curses.curs_set(0)  # Ocultar el cursor
+                                break
+                
+                            elif ch == 10:  # Tecla 'Enter' para confirmar la interfaz
+                                interfaz = interfaz_input.strip() or "vcan0"  # Usar vcan0 si no se especifica otra interfaz
+                                #stdscr.addstr(7, 2, "Interfaz seleccionada:", COLOR_YELLOW_BLACK)
+                                #stdscr.addstr(8, 2, interfaz)
+                                stdscr.refresh()
+                                curses.curs_set(0)  # Ocultar el cursor
+                                break
+
+                            elif ch == curses.KEY_BACKSPACE:  # Tecla 'Backspace' para borrar caracteres
+                                interfaz_input = interfaz_input[:-1]
+                                stdscr.move(12, 12)  # Mover el cursor a la posición correcta
+                                stdscr.clrtoeol()  # Borrar la línea actual desde la posición del cursor
+                                stdscr.addstr(12, 12, interfaz_input)  # Actualizar visualmente la interfaz
+            
+                            elif 0 <= ch <= 255:
+                                interfaz_input += chr(ch)
+                                stdscr.addstr(12, 12, interfaz_input)
+                                stdscr.refresh()
+
+
+                        stdscr.clear()
+                        stdscr.addstr(1, 2, "Monitorización de Tráfico CAN Bus", curses.A_BOLD)
+                        stdscr.addstr(4, 2, "¿Deseas filtrar por IDs? ", COLOR_CYAN_BLACK)
+            
+                        filtrar_ids_option = "No" # Valor predeterminado
+
+                        while True:
+                            if filtrar_ids_option == "Sí":
+                                stdscr.addstr(6, 4, "[X] Sí", COLOR_GREEN_BLACK)
+                                stdscr.addstr(7, 4, "[ ] No", COLOR_RED_BLACK)
+                            else:
+                                stdscr.addstr(6, 4, "[ ] Sí", COLOR_GREEN_BLACK)
+                                stdscr.addstr(7, 4, "[X] No", COLOR_RED_BLACK)
+            
+                            stdscr.refresh()
+    
+                            choice = stdscr.getch()
+                            if choice == curses.KEY_UP or choice == curses.KEY_DOWN:
+                                # Cambiar la selección entre "Sí" y "No"
+                                filtrar_ids_option = "No" if filtrar_ids_option == "Sí" else "Sí"
+    
+                            elif choice == ord('\n'):  # Confirmar la selección
+                                if filtrar_ids_option == "Sí":
+                                    filtrar_ids = True
+                                break
+    
+                            elif choice == 27:  # Tecla 'Esc' para volver al menú principal
+                                break
+    
+                    # Ejecutar python_can_viewer.py con los parámetros
+                        stdscr.clear()
+                        stdscr.refresh()
+
+                        try:
+                            command = ["python3", "python_can_viewer.py"]
+
+                            if interfaz:
+                               command += ["-c", interfaz]
+    
+                            if filtrar_ids:
+                                # Preguntar por los IDs a filtrar
+                                stdscr.clear()
+                                stdscr.addstr(1, 2, "Monitorización de Tráfico CAN Bus", curses.A_BOLD)
+                                stdscr.addstr(4, 2, "Introduce los IDs a filtrar (separados por comas):", COLOR_CYAN_BLACK)
+                    
+                                curses.curs_set(1)  # Mostrar el cursor para ingresar los IDs
+                                ids_input = ""
+
+                                while True:
+                                    ch = stdscr.getch()
+                            
+                                    if ch == 27:  # Tecla 'Esc' para volver al menú principal
+                                        curses.curs_set(0)  # Ocultar el cursor
+                                        break
+                                    elif ch == 10:  # Tecla 'Enter' para confirmar los IDs
+                                        ids = ids_input.strip()
+                                        ids_filter = ids.split(',')
+                                        if ids:
+                                            command += ["-f"]
+                                            for id in ids_filter:
+                                                command.extend([id])
+                                        #command += ["-f", ids_filter]
+                                        stdscr.refresh()
+                                        curses.curs_set(0)  # Ocultar el cursor
+                                
+                                        try:
+                                            subprocess.run(command, check=True)
+                                        except subprocess.CalledProcessError as e:
+                                            stdscr.addstr(10, 2, f"Error al ejecutar python_can_viewer.py: {str(e)}", COLOR_RED_BLACK)
+                                            stdscr.refresh()
+                                            curses.napms(2000)  # Esperar 2 segundos antes de volver al menú principal
+                                        break
+                                
+                                    elif ch == curses.KEY_BACKSPACE:  # Tecla 'Backspace' para borrar caracteres
+                                        ids_input = ids_input[:-1]
+                                        stdscr.move(6, 2)  # Mover el cursor a la posición correcta
+                                        stdscr.clrtoeol()  # Borrar la línea actual desde la posición del cursor
+                                        stdscr.addstr(6, 2, ids_input)  # Actualizar visualmente los IDs
+                                    elif 0 <= ch <= 255:
+                                        ids_input += chr(ch)
+                                        stdscr.addstr(6, 2, ids_input)
+                                        stdscr.refresh()
+                        except Exception as e:
+                            stdscr.addstr(9, 2, f"Error al ingresar los IDs a filtrar: {str(e)}", COLOR_RED_BLACK)
+                            stdscr.refresh()
+                            curses.napms(2000)  # Esperar 2 segundos antes de volver al menú principal
+                
+
+                        #elif monitorizar_option == "No":
                             # Lógica para monitorear el tráfico (implementar esta parte)
-                            pass
+                         #   pass
                             
                     elif choice == 27:
                         break #Tecla Esc para volver atrás
