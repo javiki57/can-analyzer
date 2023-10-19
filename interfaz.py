@@ -3,6 +3,7 @@ import curses
 import signal
 import database
 import subprocess
+import os
 
 def def_handler(sig, frame):
     sys.exit(1)
@@ -246,6 +247,16 @@ def main(stdscr):
                                         ids_input += chr(ch)
                                         stdscr.addstr(6, 2, ids_input)
                                         stdscr.refresh()
+                            else:
+                                while True:
+                                    try:
+                                        subprocess.run(command, check=True)
+                                    except subprocess.CalledProcessError as e:
+                                        stdscr.addstr(10, 2, f"Error al ejecutar python_can_viewer.py: {str(e)}", COLOR_RED_BLACK)
+                                        stdscr.refresh()
+                                        curses.napms(2000)  # Esperar 2 segundos antes de volver al menú principal
+                                    break
+
                         except Exception as e:
                             stdscr.addstr(9, 2, f"Error al ingresar los IDs a filtrar: {str(e)}", COLOR_RED_BLACK)
                             stdscr.refresh()
@@ -261,12 +272,14 @@ def main(stdscr):
 
             elif option == 1:
 
-                # Ingresar en la opción "Inyectar Payload"
+                # Ingresar en la opción "Inyectar Archivo"
                 stdscr.clear()
-                stdscr.addstr(1, 2, "Inyectar Payload en la red CAN Bus", curses.A_BOLD)
+                stdscr.addstr(1, 2, "Inyectar un archivo en la red CAN Bus", curses.A_BOLD)
                 stdscr.addstr(4, 2, "Indica la ruta absoluta del archivo que deseas inyectar en la red:", COLOR_CYAN_BLACK)
-                stdscr.addstr(6, 2, "Ruta del archivo:", COLOR_CYAN_BLACK)
-                stdscr.addstr(7, 2, ruta_archivo)
+                current_dir = os.path.dirname(os.path.abspath(__file__))  # Obtener la ruta del directorio actual
+                stdscr.addstr(6, 2, "Ruta actual del directorio: ", COLOR_CYAN_BLACK)
+                stdscr.addstr(6 ,30, f"{current_dir}", COLOR_MAGENTA_BLACK)
+                stdscr.addstr(8, 2, ruta_archivo)
                 stdscr.refresh()
                 curses.curs_set(1)  # Mostrar el cursor para ingresar la ruta del archivo
                 
@@ -280,24 +293,21 @@ def main(stdscr):
 
                     elif ch == 10:  # Tecla 'Enter' para confirmar la ruta del archivo
                         # Aquí se almacena la ruta del archivo en la variable y procesarla
-                        stdscr.addstr(9, 2, "Ruta almacenada:", COLOR_YELLOW_BLACK)
-                        stdscr.addstr(10, 2, ruta_archivo)
+                        stdscr.addstr(10, 2, "Ruta almacenada:", COLOR_YELLOW_BLACK)
+                        stdscr.addstr(11, 2, ruta_archivo)
                         stdscr.refresh()
-
-                    elif ch == 8:  # Tecla 'Backspace' para borrar caracteres
-                        ruta_archivo = ruta_archivo[:-1]
-
+                    
                     elif ch == curses.KEY_BACKSPACE:
                         if ruta_archivo:
                             ruta_archivo = ruta_archivo[:-1]
-                            stdscr.move(7, 2)  # Mover el cursor a la posición correcta
+                            stdscr.move(8, 2)  # Mover el cursor a la posición correcta
                             stdscr.clrtoeol()  # Borrar la línea actual desde la posición del cursor
-                            stdscr.addstr(7, 2, ruta_archivo)  # Actualizar visualmente la ruta
+                            stdscr.addstr(8, 2, ruta_archivo)  # Actualizar visualmente la ruta
 
 
                     elif 0 <= ch <= 255:
                         ruta_archivo += chr(ch)
-                        stdscr.addstr(7, 2, ruta_archivo)
+                        stdscr.addstr(8, 2, ruta_archivo)
                         stdscr.refresh()
 
                 # Lógica para la opción 2 (Inyectar Payload)
