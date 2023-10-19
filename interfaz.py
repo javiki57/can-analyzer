@@ -79,7 +79,7 @@ def main(stdscr):
                 while True:
                     stdscr.clear()
                     stdscr.addstr(1, 2, "Monitorización de Tráfico CAN Bus", curses.A_BOLD)
-                    stdscr.addstr(4, 2, "¿Deseas almacenar el tráfico en un archivo CSV?", COLOR_CYAN_BLACK)
+                    stdscr.addstr(4, 2, "¿Deseas almacenar el tráfico en un archivo?", COLOR_CYAN_BLACK)
                     stdscr.addstr(6, 2, "Seleccione una opción:", COLOR_CYAN_BLACK)
                     
                     if monitorizar_option == "Sí":
@@ -105,7 +105,7 @@ def main(stdscr):
                         if monitorizar_option == "Sí":
                             stdscr.clear()
                             stdscr.addstr(1, 2, "Monitorización de Tráfico CAN Bus", curses.A_BOLD)
-                            stdscr.addstr(4, 2, "Introduce el nombre del archivo CSV para guardar las tramas:", COLOR_CYAN_BLACK)
+                            stdscr.addstr(4, 2, "Introduce el nombre del archivo para guardar las tramas:", COLOR_CYAN_BLACK)
                             stdscr.addstr(6, 2, "Nombre del archivo:", COLOR_CYAN_BLACK)
                             stdscr.addstr(7, 2, ruta_archivo)
                             stdscr.refresh()
@@ -121,7 +121,7 @@ def main(stdscr):
                                 elif ch == 10:  # Tecla 'Enter' para confirmar el nombre del archivo
                                     # Aquí se almacena el nombre del archivo y se comienza a capturar tramas
                                     nombre_archivo = ruta_archivo.strip() + ".csv"
-                                    
+                                    break
 
                                 elif ch == curses.KEY_BACKSPACE:  # Tecla 'Backspace' para borrar caracteres
                                     ruta_archivo = ruta_archivo[:-1]
@@ -194,7 +194,7 @@ def main(stdscr):
                             elif choice == 27:  # Tecla 'Esc' para volver al menú principal
                                 break
     
-                    # Ejecutar python_can_viewer.py con los parámetros
+                        # Ejecutar python_can_viewer.py con los parámetros
                         stdscr.clear()
                         stdscr.refresh()
 
@@ -231,7 +231,40 @@ def main(stdscr):
                                         curses.curs_set(0)  # Ocultar el cursor
                                 
                                         try:
-                                            subprocess.run(command, check=True)
+                                            if (monitorizar_option == "Sí"):
+                                                import database
+
+                                                # Ejecutar el comando y capturar la salida
+                                                completed_process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, check=True)
+                                                command_output = completed_process.stdout
+
+                                                # Procesar la salida para obtener los datos
+                                                lines = command_output.splitlines()
+                                                for line in lines:
+                                                    # Analizar cada línea y extraer los datos
+                                                    parts = line.strip().split()
+
+                                                    #if len(parts) != 7:
+                                                    #    continue  # Ignorar líneas que no cumplan con el formato esperado
+
+                                                    conteo = int(parts[0])
+                                                    tiempo = float(parts[1])
+                                                    frecuencia = float(parts[2])
+                                                    id_hex = parts[3]
+                                                    tam = int(parts[4])
+                                                    datos_hex = parts[5]
+                                                    funcion = parts[6]
+                                                    id_nodo = int(parts[7])
+
+                                                    # Insertar los datos en la base de datos
+                                                    database.insertar_trama(conteo, tiempo, frecuencia, id_hex, tam, datos_hex, funcion, id_nodo)
+
+                                                stdscr.addstr(9, 2, "Tráfico almacenado en la base de datos.", COLOR_YELLOW_BLACK)
+                                                conn.commit()  # Guarda los cambios en la base de datos
+                                            
+                                            else:
+                                                subprocess.run(command, check=True)
+
                                         except subprocess.CalledProcessError as e:
                                             stdscr.addstr(10, 2, f"Error al ejecutar python_can_viewer.py: {str(e)}", COLOR_RED_BLACK)
                                             stdscr.refresh()
