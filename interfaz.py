@@ -235,30 +235,14 @@ def main(stdscr):
                                             if (monitorizar_option == "Sí"):
                                                 import database
 
-                                                # Ejecutar el comando y capturar la salida
-                                                completed_process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, check=True)
-                                                command_output = completed_process.stdout
+                                                if nombre_archivo:
+                                                    command += ["-o", nombre_archivo]
 
-                                                # Procesar la salida para obtener los datos
-                                                lines = command_output.splitlines()
-                                                for line in lines:
-                                                    # Analizar cada línea y extraer los datos
-                                                    parts = line.strip().split()
+                                                # Ejecutar el comando
+                                                completed_process = subprocess.run(command, check=True)
 
-                                                    #if len(parts) != 7:
-                                                    #    continue  # Ignorar líneas que no cumplan con el formato esperado
-
-                                                    conteo = int(parts[0])
-                                                    tiempo = float(parts[1])
-                                                    frecuencia = float(parts[2])
-                                                    id_hex = parts[3]
-                                                    tam = int(parts[4])
-                                                    datos_hex = parts[5]
-                                                    funcion = parts[6]
-                                                    id_nodo = int(parts[7])
-
-                                                    # Insertar los datos en la base de datos
-                                                    database.insertar_trama(conteo, tiempo, frecuencia, id_hex, tam, datos_hex, funcion, id_nodo)
+                                                # Insertar los datos en la base de datos
+                                                database.create_database_and_table(nombre_archivo)
 
                                                 conn.commit()  # Guarda los cambios en la base de datos
                                             
@@ -295,11 +279,7 @@ def main(stdscr):
                             stdscr.refresh()
                             curses.napms(2000)  # Esperar 2 segundos antes de volver al menú principal
                 
-
-                        #elif monitorizar_option == "No":
-                            # Lógica para monitorear el tráfico (implementar esta parte)
-                         #   pass
-                            
+                        
                     elif choice == 27:
                         break #Tecla Esc para volver atrás
 

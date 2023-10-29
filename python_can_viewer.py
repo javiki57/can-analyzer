@@ -8,6 +8,7 @@ import os
 import six
 import struct
 import sys
+import csv
 
 from curses.ascii import ESC as KEY_ESC, SP as KEY_SPACE
 from typing import Dict, List, Tuple, Union
@@ -63,10 +64,12 @@ canopen_function_codes = {
 
 class CanViewer:
 
-    def __init__(self, stdscr, bus, ignore_canopen, testing=False):
+    def __init__(self, stdscr, bus, ignore_canopen, output_file, testing=False):
         self.stdscr = stdscr
         self.bus = bus
         self.ignore_canopen = ignore_canopen
+        self.output_file = output_file
+        self.data_rows = []  # Lista para almacenar las filas de datos capturados
 
         # Initialise the ID dictionary, start timestamp, scroll and variable for pausing the viewer
         self.ids = {}
@@ -95,6 +98,10 @@ class CanViewer:
                 msg = self.bus.recv(timeout=0)
                 if msg is not None:
                     self.draw_can_bus_message(msg)
+
+
+            if self.output_file:
+                self.save_data_to_file()
 
             # Read the terminal input
             key = self.stdscr.getch()
@@ -136,6 +143,34 @@ class CanViewer:
 
         # Shutdown the CAN-Bus interface
         self.bus.shutdown()
+
+
+
+    def save_data_to_file(self):
+
+        with open(self.output_file, 'w') as file:
+            # Escribir encabezados en el archivo
+            file.write("Conteo,Tiempo,Frecuencia,ID,Tam,Datos,Funcion,IDNodo\n")
+
+            for key in self.ids.keys():
+                msg = self.ids[key]['msg']
+
+                # Format the message data as a string
+                data_string = ' '.join('{:02X}'.format(x) for x in msg.data)
+
+                # Construir la fila de datos en formato CSV
+                row = f"{self.ids[key]['count']},{msg.timestamp - self.start_time:.6f},{self.ids[key]['dt']:.6f},{msg.arbitration_id},{msg.dlc},{data_string},"
+
+                canopen_function_code_string, canopen_node_id_string = self.parse_canopen_message(msg)
+                row += f"{canopen_function_code_string},{canopen_node_id_string}"
+
+                # Agregar la fila a la lista de datos
+                self.data_rows.append(row)
+
+            # Escribir todas las filas de datos en el archivo
+            file.write('\n'.join(self.data_rows))
+
+
 
     # Convert it into raw integer values and then pack the data
     @staticmethod
@@ -413,7 +448,8 @@ def parse_args(args):
     optional.add_argument('-i', '--interface', dest='interface',
                           help='''R|Specify the backend CAN interface to use. (default: "socketcan")''',
                           choices=sorted(can.VALID_INTERFACES), default='socketcan')
-
+    
+    optional.add_argument('-o', '--output', help='Specify the output CSV file for storing data.', default=None)
 
     parsed_args = parser.parse_args(args)
 
@@ -429,7 +465,9 @@ def parse_args(args):
 
 def main():  # pragma: no cover
     parsed_args, can_filters = parse_args(sys.argv[1:])
-
+    
+    output_file = parsed_args.output
+    
     config = {}
     if can_filters:
         config['can_filters'] = can_filters
@@ -440,7 +478,7 @@ def main():  # pragma: no cover
     bus = can.interface.Bus(parsed_args.channel, **config)
     # print('Connected to {}: {}'.format(bus.__class__.__name__, bus.channel_info))
 
-    curses.wrapper(CanViewer, bus, ignore_canopen=None)
+    curses.wrapper(CanViewer, bus, ignore_canopen=None, output_file=parsed_args.output)
 
 
 if __name__ == '__main__':  # pragma: no cover

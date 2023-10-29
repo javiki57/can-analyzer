@@ -1,64 +1,48 @@
 import sqlite3
 import csv
+import os
+import sys
 
-# Nombre del archivo CSV para almacenar los datos
-nombre_archivo = "datos_can.csv"
+def create_database_and_table(csv_filename):
+    if not os.path.exists(csv_filename):
+        print(f"El archivo CSV '{csv_filename}' no existe.")
+        return
 
-# Conectar a la base de datos (creará un nuevo archivo si no existe)
-conn = sqlite3.connect('can_traffic.db')
+    # Obtener el nombre del archivo sin la extensión
+    table_name = os.path.splitext(os.path.basename(csv_filename))[0]
 
-# Crear un cursor para ejecutar comandos SQL
-cursor = conn.cursor()
+    # Crear una base de datos SQLite
+    conn = sqlite3.connect('can_traffic.db')
+    cursor = conn.cursor()
 
-# Crear una tabla para almacenar el tráfico CAN
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS can_data (
-        conteo INTEGER,
-        tiempo REAL,
-        frecuencia REAL,
-        id TEXT PRIMARY KEY,
-        tam INTEGER,
-        datos TEXT,
-        funcion TEXT,
-        id_nodo INTEGER
-    )
-''')
+    # Leer la primera línea del archivo CSV para obtener los nombres de las columnas
+    with open(csv_filename, newline='') as csvfile:
+        reader = csv.reader(csvfile)
+        columns = next(reader)
 
-# Función para inicializar el archivo CSV
-def inicializar_archivo():
-    with open(nombre_archivo, mode='w', newline='') as archivo_csv:
-        escritor = csv.writer(archivo_csv)
-        escritor.writerow(['ID', 'Tiempo', 'Frecuencia', 'Función', 'ID Nodo', 'Tam', 'Datos'])
-
-# Función para agregar una nueva trama al archivo CSV
-def agregar_trama(trama):
-    with open(nombre_archivo, mode='a', newline='') as archivo_csv:
-        escritor = csv.writer(archivo_csv)
-        escritor.writerow([trama['ID'], trama['tiempo'], trama['frecuencia'], trama['funcion'], trama['id_nodo'], trama['tam'], trama['datos']])
-
-# Función para consultar todas las tramas del archivo CSV
-def consultar_tramas():
-    tramas = []
-    with open(nombre_archivo, mode='r', newline='') as archivo_csv:
-        lector = csv.DictReader(archivo_csv)
-        for fila in lector:
-            tramas.append(fila)
-    return tramas
-
-def insertar_trama(conteo, tiempo, frecuencia, id, tam, datos, funcion, id_nodo):
-    cursor.execute('''
-        INSERT INTO can_data (conteo, tiempo, frecuencia, id, tam, datos, funcion, id_nodo)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (conteo, tiempo, frecuencia, id, tam, datos, funcion, id_nodo))
+    # Crear la tabla con las columnas correspondientes
+    create_table_sql = f"CREATE TABLE IF NOT EXISTS {table_name} ({', '.join(columns)})"
+    cursor.execute(create_table_sql)
     conn.commit()
 
+    # Leer el archivo CSV y agregar los datos a la tabla
+    with open(csv_filename, newline='') as csvfile:
+        reader = csv.reader(csvfile)
+        next(reader)  # Saltar la primera fila, ya que son los nombres de las columnas
+        for row in reader:
+            # Generar una cadena de marcadores de posición para los valores
+            placeholders = ', '.join(['?'] * len(columns))
+            insert_sql = f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({placeholders})"
+            cursor.execute(insert_sql, row)
 
-# Función para consultar todas las tramas almacenadas
-def consultar_tramas():
-    cursor.execute('SELECT * FROM can_data')
-    return cursor.fetchall()
-
-
-# Función para cerrar la conexión con la base de datos
-def cerrar_base_de_datos():
+    conn.commit()
     conn.close()
+    print(f"Se ha creado la base de datos 'can_traffic.db' y se ha importado el archivo '{csv_filename}' en la tabla '{table_name}'.")
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Uso: python database.py <nombre_archivo_csv>")
+        sys.exit(1)
+
+    csv_filename = sys.argv[1]
+    create_database_and_table(csv_filename)
