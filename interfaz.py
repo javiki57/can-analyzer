@@ -105,7 +105,7 @@ def main(stdscr):
                         if monitorizar_option == "Sí":
                             stdscr.clear()
                             stdscr.addstr(1, 2, "Monitorización de Tráfico CAN Bus", curses.A_BOLD)
-                            stdscr.addstr(4, 2, "Introduce el nombre del archivo para guardar las tramas:", COLOR_CYAN_BLACK)
+                            stdscr.addstr(4, 2, "Introduce el nombre del archivo CSV para guardar las tramas:", COLOR_CYAN_BLACK)
                             stdscr.addstr(6, 2, "Nombre del archivo:", COLOR_CYAN_BLACK)
                             stdscr.addstr(7, 2, ruta_archivo)
                             stdscr.refresh()
@@ -121,6 +121,7 @@ def main(stdscr):
                                 elif ch == 10:  # Tecla 'Enter' para confirmar el nombre del archivo
                                     # Aquí se almacena el nombre del archivo y se comienza a capturar tramas
                                     nombre_archivo = ruta_archivo.strip() + ".csv"
+                                    curses.curs_set(0)  # Ocultar el cursor
                                     break
 
                                 elif ch == curses.KEY_BACKSPACE:  # Tecla 'Backspace' para borrar caracteres
@@ -226,7 +227,7 @@ def main(stdscr):
                                             command += ["-f"]
                                             for id in ids_filter:
                                                 command.extend([id])
-                                        #command += ["-f", ids_filter]
+                                        
                                         stdscr.refresh()
                                         curses.curs_set(0)  # Ocultar el cursor
                                 
@@ -259,7 +260,6 @@ def main(stdscr):
                                                     # Insertar los datos en la base de datos
                                                     database.insertar_trama(conteo, tiempo, frecuencia, id_hex, tam, datos_hex, funcion, id_nodo)
 
-                                                stdscr.addstr(9, 2, "Tráfico almacenado en la base de datos.", COLOR_YELLOW_BLACK)
                                                 conn.commit()  # Guarda los cambios en la base de datos
                                             
                                             else:
