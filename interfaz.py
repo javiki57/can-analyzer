@@ -383,11 +383,98 @@ def main(stdscr):
                         stdscr.addstr(8, 2, ruta_archivo)
                         stdscr.refresh()
 
-                # Lógica para la opción 2 (Inyectar Payload)
-                # pass   Implementar la funcionalidad
+
             elif option == 2:
                 # Lógica para la opción 3 (Modificar Payload)
-                pass  # Implementar la funcionalidad
+
+                stdscr.clear()
+                stdscr.addstr(1, 2, "Monitorización de Tráfico CAN Bus", curses.A_BOLD)
+                stdscr.addstr(4, 2, "¿Qué interfaz vas a utilizar? (Por defecto vcan0):", COLOR_CYAN_BLACK)
+                stdscr.addstr(5, 2, "Interfaz:", COLOR_CYAN_BLACK)
+                curses.curs_set(1)
+                interfaz_input = ""
+
+                while True:
+                    ch = stdscr.getch()
+                    if ch == 27:  # Tecla 'Esc' para volver al menú principal
+                        curses.curs_set(0)  # Ocultar el cursor
+                        atras = True
+                        break
+        
+                    elif ch == 10:  # Tecla 'Enter' para confirmar la interfaz
+                        interfaz = interfaz_input.strip() or "vcan0"  # Usar vcan0 si no se especifica otra interfaz
+                        stdscr.refresh()
+                        
+
+
+                        curses.curs_set(1)  # Mostrar el cursor
+                        stdscr.clear()
+                        stdscr.addstr(1, 2, "Modificar Trama CAN Bus", curses.A_BOLD)
+                        stdscr.addstr(3, 2, "Escribe el ID y pulsa TAB para escribir en el campo Datos", COLOR_CYAN_BLACK)
+                        stdscr.addstr(5, 2, "|  ID |       Datos       |", COLOR_GREEN_BLACK)
+                        stdscr.addstr(6, 2, "+-----+-------------------+", COLOR_GREEN_BLACK)
+                        stdscr.addstr(7, 2, "|     |                   |", COLOR_GREEN_BLACK)
+                        
+
+                        trama = ""
+                        id_input = ""
+                        data_input = ""
+                        id_mode = True
+
+                        while True:
+                            key = stdscr.getch()
+
+                            if key == 9:  # Tecla 'Tab' para cambiar entre ID y Datos
+                                id_mode = not id_mode
+
+                            elif key == 10:  # Tecla 'Enter' para confirmar los datos
+                                trama = f"{id_input}#{data_input}"
+                                
+                                try:
+                                    subprocess.run(["python3","cansend.py", interfaz, trama], check=True)
+                                    sys.exit(0)
+                                except subprocess.CalledProcessError as e:
+                                    stdscr.addstr(10, 2, f"Error al inyectar el archivo: {str(e)}", COLOR_RED_BLACK)
+                                    stdscr.refresh()
+
+                                break
+
+                            elif key == curses.KEY_BACKSPACE:  # Tecla 'Backspace' para borrar caracteres
+                                if id_mode:
+                                    if id_input:
+                                        id_input = id_input[:-1]
+                                        stdscr.move(7, 3 + len(id_input))
+                                        stdscr.clrtoeol()
+                                else:
+                                    if data_input:
+                                        data_input = data_input[:-1]
+                                        stdscr.move(7, 9 + len(data_input))
+                                        stdscr.clrtoeol()
+
+                            elif 0 <= key <= 255:
+                                if id_mode:
+                                    id_input += chr(key)
+                                    stdscr.addch(7, 3 + len(id_input), key)
+                                else:
+                                    data_input += chr(key)
+                                    stdscr.addch(7, 9 + len(data_input), key)
+
+                        curses.curs_set(0)  # Ocultar el cursor
+                        stdscr.getch()
+
+
+
+                    elif ch == curses.KEY_BACKSPACE:  # Tecla 'Backspace' para borrar caracteres
+                        interfaz_input = interfaz_input[:-1]
+                        stdscr.move(4, 12)  # Mover el cursor a la posición correcta
+                        stdscr.clrtoeol()  # Borrar la línea actual desde la posición del cursor
+                        stdscr.addstr(4, 12, interfaz_input)  # Actualizar visualmente la interfaz
+
+                    elif 0 <= ch <= 255:
+                        interfaz_input += chr(ch)
+                        stdscr.addstr(4, 12, interfaz_input)
+                        stdscr.refresh()
+
 
             elif option == 3:
             	pass # Implementar funcionalidad
