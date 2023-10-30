@@ -411,9 +411,11 @@ def main(stdscr):
                         stdscr.clear()
                         stdscr.addstr(1, 2, "Modificar Trama CAN Bus", curses.A_BOLD)
                         stdscr.addstr(3, 2, "Escribe el ID y pulsa TAB para escribir en el campo Datos", COLOR_CYAN_BLACK)
+                        stdscr.addstr(4, 2, "+-----+-------------------+", COLOR_GREEN_BLACK)
                         stdscr.addstr(5, 2, "|  ID |       Datos       |", COLOR_GREEN_BLACK)
                         stdscr.addstr(6, 2, "+-----+-------------------+", COLOR_GREEN_BLACK)
                         stdscr.addstr(7, 2, "|     |                   |", COLOR_GREEN_BLACK)
+                        stdscr.addstr(8, 2, "+-----+-------------------+", COLOR_GREEN_BLACK)
                         
 
                         trama = ""
