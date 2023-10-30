@@ -253,34 +253,6 @@ def main(stdscr):
                                                 stdscr.refresh()
                                                 curses.curs_set(0)  # Ocultar el cursor
                                         
-                                                try:
-                                                    if (monitorizar_option == "Sí"):
-                                                        
-
-                                                        if nombre_archivo:
-                                                            command += ["-o", nombre_archivo]
-
-                                                        # Ejecutar el comando
-                                                        subprocess.run(command, check=True)
-
-                                                        if stop_execution:
-                                                            db = ["python3", "database.py", nombre_archivo]
-
-                                                            # Insertar los datos en la base de datos
-                                                            subprocess.run(db, check=True)
-
-                                                    
-                                                    else:
-                                                        subprocess.run(command, check=True)
-
-                                                except subprocess.CalledProcessError as e:
-                                                    #stdscr.addstr(10, 2, f"Error al ejecutar python_can_viewer.py: {str(e)}", COLOR_RED_BLACK)
-                                                    stdscr.refresh()
-                                                    curses.curs_set(0)  # Ocultar el cursor
-                                                    #exit()
-                                                    #curses.napms(2000)  # Esperar 2 segundos antes de volver al menú principal
-                                                break
-                                        
                                             elif ch == curses.KEY_BACKSPACE:  # Tecla 'Backspace' para borrar caracteres
                                                 ids_input = ids_input[:-1]
                                                 stdscr.move(6, 2)  # Mover el cursor a la posición correcta
@@ -290,17 +262,34 @@ def main(stdscr):
                                                 ids_input += chr(ch)
                                                 stdscr.addstr(6, 2, ids_input)
                                                 stdscr.refresh()
-                                    else:
-                                        while True:
-                                            try:
-                                                subprocess.run(command, check=True)
-                                            except subprocess.CalledProcessError as e:
-                                                #stdscr.addstr(10, 2, f"Error al ejecutar python_can_viewer.py: {str(e)}", COLOR_RED_BLACK)
-                                                stdscr.refresh()
-                                                curses.curs_set(0)  # Ocultar el cursor
-                                                #exit()
-                                                #curses.napms(2000)  # Esperar 2 segundos antes de volver al menú principal
-                                            break
+                                    
+                                    try:
+                                        if (monitorizar_option == "Sí"):
+                                            
+                                            #stdscr.refresh()
+                                            #curses.curs_set(0)  # Ocultar el cursor
+
+                                            command += ["-o", nombre_archivo]
+
+                                            # Ejecutar el comando
+                                            subprocess.run(command, check=True)
+
+                                            #Añadir el contenido del csv a la base de datos
+                                            db = ["python3", "database.py", nombre_archivo]
+                                            subprocess.run(db, check=True)
+
+                                        
+                                        else:
+                                            subprocess.run(command, check=True)
+
+                                    except subprocess.CalledProcessError as e:
+                                        #stdscr.addstr(10, 2, f"Error al ejecutar python_can_viewer.py: {str(e)}", COLOR_RED_BLACK)
+                                        stdscr.refresh()
+                                        curses.curs_set(0)  # Ocultar el cursor
+                                        #exit()
+                                        #curses.napms(2000)  # Esperar 2 segundos antes de volver al menú principal
+                                    #break
+
 
                                 except Exception as e:
                                     #stdscr.addstr(9, 2, f"Error al ingresar los IDs a filtrar: {str(e)}", COLOR_RED_BLACK)
