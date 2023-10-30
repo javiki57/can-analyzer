@@ -11,7 +11,7 @@ def def_handler(sig, frame):
 def stop_execution_handler(signal, frame):
     global stop_execution
     stop_execution = True
-
+    
 def main(stdscr):
     # Configuración inicial de la terminal
     curses.curs_set(0)
@@ -249,9 +249,7 @@ def main(stdscr):
                                                     command += ["-f"]
                                                     for id in ids_filter:
                                                         command.extend([id])
-                                                
-                                                stdscr.refresh()
-                                                curses.curs_set(0)  # Ocultar el cursor
+                                                break
                                         
                                             elif ch == curses.KEY_BACKSPACE:  # Tecla 'Backspace' para borrar caracteres
                                                 ids_input = ids_input[:-1]
@@ -266,8 +264,8 @@ def main(stdscr):
                                     try:
                                         if (monitorizar_option == "Sí"):
                                             
-                                            #stdscr.refresh()
-                                            #curses.curs_set(0)  # Ocultar el cursor
+                                            stdscr.refresh()
+                                            curses.curs_set(0)  # Ocultar el cursor
 
                                             command += ["-o", nombre_archivo]
 
