@@ -157,9 +157,13 @@ class CanViewer:
 
                 # Format the message data as a string
                 data_string = ' '.join('{:02X}'.format(x) for x in msg.data)
+        
+                # Format the arbitration ID as a hexadecimal value
+                arbitration_id_string = '{0:0{1}X}'.format(msg.arbitration_id, 8 if msg.is_extended_id else 3)
+
 
                 # Construir la fila de datos en formato CSV
-                row = f"{self.ids[key]['count']},{msg.timestamp - self.start_time:.6f},{self.ids[key]['dt']:.6f},{msg.arbitration_id},{msg.dlc},{data_string},"
+                row = f"{self.ids[key]['count']},{msg.timestamp - self.start_time:.6f},{self.ids[key]['dt']:.6f},{arbitration_id_string},{msg.dlc},{data_string},"
 
                 canopen_function_code_string, canopen_node_id_string = self.parse_canopen_message(msg)
                 row += f"{canopen_function_code_string},{canopen_node_id_string}"
