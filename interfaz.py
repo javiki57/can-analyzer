@@ -275,6 +275,7 @@ def main(stdscr):
                                             #Añadir el contenido del csv a la base de datos
                                             db = ["python3", "database.py", nombre_archivo]
                                             subprocess.run(db, check=True)
+                                            sys.exit(0)
 
                                         
                                         else:
@@ -322,11 +323,53 @@ def main(stdscr):
                         break
 
                     elif ch == 10:  # Tecla 'Enter' para confirmar la ruta del archivo
-                        # Aquí se almacena la ruta del archivo en la variable y procesarla
-                        stdscr.addstr(10, 2, "Ruta almacenada:", COLOR_YELLOW_BLACK)
-                        stdscr.addstr(11, 2, ruta_archivo)
-                        stdscr.refresh()
-                    
+                        
+                        stdscr.clear()
+                        stdscr.addstr(1, 2, "Monitorización de Tráfico CAN Bus", curses.A_BOLD)
+                        stdscr.addstr(4, 2, "¿Qué interfaz vas a utilizar? (Por defecto vcan0):", COLOR_CYAN_BLACK)
+                        stdscr.addstr(5, 2, "Interfaz:", COLOR_CYAN_BLACK)
+                        curses.curs_set(1)
+                        interfaz_input = ""
+                        atras = False
+
+                        while True:
+                            ch = stdscr.getch()
+                            if ch == 27:  # Tecla 'Esc' para volver al menú principal
+                                curses.curs_set(0)  # Ocultar el cursor
+                                atras = True
+                                break
+                
+                            elif ch == 10:  # Tecla 'Enter' para confirmar la interfaz
+                                interfaz = interfaz_input.strip() or "vcan0"  # Usar vcan0 si no se especifica otra interfaz
+                                #stdscr.addstr(7, 2, "Interfaz seleccionada:", COLOR_YELLOW_BLACK)
+                                #stdscr.addstr(8, 2, interfaz)
+                                #stdscr.refresh()
+                                curses.curs_set(0)  # Ocultar el cursor
+                                break
+
+                            elif ch == curses.KEY_BACKSPACE:  # Tecla 'Backspace' para borrar caracteres
+                                interfaz_input = interfaz_input[:-1]
+                                stdscr.move(4, 12)  # Mover el cursor a la posición correcta
+                                stdscr.clrtoeol()  # Borrar la línea actual desde la posición del cursor
+                                stdscr.addstr(4, 12, interfaz_input)  # Actualizar visualmente la interfaz
+            
+                            elif 0 <= ch <= 255:
+                                interfaz_input += chr(ch)
+                                stdscr.addstr(4, 12, interfaz_input)
+                                stdscr.refresh()
+
+                        if not atras:
+                            # Ejecutar el comando de inyección de archivo
+                            try:
+                                subprocess.run(["python3","canplayer.py", interfaz, ruta_archivo], check=True)
+                                sys.exit(0)
+                            except subprocess.CalledProcessError as e:
+                                stdscr.addstr(10, 2, f"Error al inyectar el archivo: {str(e)}", COLOR_RED_BLACK)
+                                stdscr.refresh()
+                                #curses.napms(2000)  # Esperar 2 segundos antes de volver al menú principal
+
+
+
                     elif ch == curses.KEY_BACKSPACE:
                         if ruta_archivo:
                             ruta_archivo = ruta_archivo[:-1]
