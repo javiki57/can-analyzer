@@ -11,6 +11,48 @@ def def_handler(sig, frame):
 def stop_execution_handler(signal, frame):
     global stop_execution
     stop_execution = True
+
+def replace_id_data_in_file(file_path, id_to_replace, new_data):
+    try:
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+
+        with open(file_path, 'w') as file:
+            for line in lines:
+                if id_to_replace in line:
+                    line_parts = line.split('#')
+                    if len(line_parts) == 2:
+                        # Reemplazar el valor de datos
+                        line = f"{id_to_replace}#{new_data}\n"
+                file.write(line)
+
+        return True
+    except Exception as e:
+        print(f"Error al modificar el archivo: {str(e)}")
+        return False
+
+def replace_data_in_file(file_path, id_to_replace, new_data, n):
+    try:
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
+
+        count = 0
+        with open(file_path, 'w') as file:
+            for line in lines:
+                if id_to_replace in line:
+                    count += 1
+                    if count == n:
+                        line_parts = line.split('#')
+                        if len(line_parts) == 2:
+                            # Reemplazar el valor de datos
+                            line = f"{id_to_replace}#{new_data}\n"
+                file.write(line)
+
+        return True
+    except Exception as e:
+        print(f"Error al modificar el archivo: {str(e)}")
+        return False
+
     
 def main(stdscr):
     # Configuración inicial de la terminal
@@ -385,7 +427,7 @@ def main(stdscr):
 
 
             elif option == 2:
-                # Lógica para la opción 3 (Modificar Payload)
+                # Lógica para la opción 3 (Inyectar Payload)
 
                 stdscr.clear()
                 stdscr.addstr(1, 2, "Monitorización de Tráfico CAN Bus", curses.A_BOLD)
@@ -409,7 +451,7 @@ def main(stdscr):
 
                         curses.curs_set(1)  # Mostrar el cursor
                         stdscr.clear()
-                        stdscr.addstr(1, 2, "Modificar Trama CAN Bus", curses.A_BOLD)
+                        stdscr.addstr(1, 2, "Inyectar Trama CAN Bus", curses.A_BOLD)
                         stdscr.addstr(3, 2, "Escribe el ID y pulsa TAB para escribir en el campo Datos", COLOR_CYAN_BLACK)
                         stdscr.addstr(4, 2, "+-----+-------------------+", COLOR_GREEN_BLACK)
                         stdscr.addstr(5, 2, "|  ID |       Datos       |", COLOR_GREEN_BLACK)
@@ -479,10 +521,250 @@ def main(stdscr):
 
 
             elif option == 3:
-            	pass # Implementar funcionalidad
+            	
+
+                stdscr.clear()
+                stdscr.addstr(1, 2, "Modificar un archivo en la red CAN Bus", curses.A_BOLD)
+                stdscr.addstr(4, 2, "Indica la ruta absoluta del archivo que deseas modificar en la red:", COLOR_CYAN_BLACK)
+                current_dir = os.path.dirname(os.path.abspath(__file__))  # Obtener la ruta del directorio actual
+                stdscr.addstr(6, 2, "Ruta actual del directorio: ", COLOR_CYAN_BLACK)
+                stdscr.addstr(6 ,30, f"{current_dir}", COLOR_MAGENTA_BLACK)
+                stdscr.addstr(8, 2, ruta_archivo)
+                stdscr.refresh()
+                curses.curs_set(1)  # Mostrar el cursor para ingresar la ruta del archivo
+                
+                
+                while True:
+                    ch = stdscr.getch()
+
+                    if ch == 27:  # Tecla 'Esc' para volver al menú principal
+                        curses.curs_set(0)  # Ocultar el cursor
+                        break
+
+                    elif ch == 10:  # Tecla 'Enter' para confirmar la ruta del archivo
+                        
+
+
+                        stdscr.refresh()
+                        curses.curs_set(1)  # Mostrar el cursor
+                        stdscr.clear()
+                        stdscr.addstr(1, 2, "Modificar Trama CAN Bus", curses.A_BOLD)
+                        stdscr.addstr(3, 2, "Escribe el ID y pulsa TAB para escribir en el campo Datos", COLOR_CYAN_BLACK)
+                        stdscr.addstr(4, 2, "+-----+-------------------+", COLOR_GREEN_BLACK)
+                        stdscr.addstr(5, 2, "|  ID |       Datos       |", COLOR_GREEN_BLACK)
+                        stdscr.addstr(6, 2, "+-----+-------------------+", COLOR_GREEN_BLACK)
+                        stdscr.addstr(7, 2, "|     |                   |", COLOR_GREEN_BLACK)
+                        stdscr.addstr(8, 2, "+-----+-------------------+", COLOR_GREEN_BLACK)
+                        
+
+                        trama = ""
+                        id_input = ""
+                        data_input = ""
+                        id_mode = True
+
+                        while True:
+                            key = stdscr.getch()
+
+                            if key == 9:  # Tecla 'Tab' para cambiar entre ID y Datos
+                                id_mode = not id_mode
+
+                            elif key == 10:  # Tecla 'Enter' para confirmar los datos
+                                #trama = f"{id_input}#{data_input}"
+                                
+                                # Reemplazar 'data_input' con 'new_data' en el archivo
+                                if replace_id_data_in_file(ruta_archivo, id_input, data_input):
+                                    stdscr.addstr(10, 2, "Archivo modificado con éxito.", COLOR_GREEN_BLACK)
+                                else:
+                                    stdscr.addstr(10, 2, "Error al modificar el archivo.", COLOR_RED_BLACK)
+                                stdscr.refresh()
+
+                                curses.curs_set(0)  # Ocultar el cursor
+                                stdscr.getch()
+
+                                break
+
+                            elif ch == 27:  # Tecla 'Esc' para volver al menú principal
+                                curses.curs_set(0)  # Ocultar el cursor
+                                break
+
+                            elif key == curses.KEY_BACKSPACE:  # Tecla 'Backspace' para borrar caracteres
+                                if id_mode:
+                                    if id_input:
+                                        id_input = id_input[:-1]
+                                        stdscr.move(7, 3 + len(id_input))
+                                        stdscr.clrtoeol()
+                                else:
+                                    if data_input:
+                                        data_input = data_input[:-1]
+                                        stdscr.move(7, 9 + len(data_input))
+                                        stdscr.clrtoeol()
+
+                            elif 0 <= key <= 255:
+                                if id_mode:
+                                    id_input += chr(key)
+                                    stdscr.addch(7, 3 + len(id_input), key)
+                                else:
+                                    data_input += chr(key)
+                                    stdscr.addch(7, 9 + len(data_input), key)
+
+                        curses.curs_set(0)  # Ocultar el cursor
+                        stdscr.getch()
+
+
+                    elif ch == curses.KEY_BACKSPACE:
+                        if ruta_archivo:
+                            ruta_archivo = ruta_archivo[:-1]
+                            stdscr.move(8, 2)  # Mover el cursor a la posición correcta
+                            stdscr.clrtoeol()  # Borrar la línea actual desde la posición del cursor
+                            stdscr.addstr(8, 2, ruta_archivo)  # Actualizar visualmente la ruta
+
+
+                    elif 0 <= ch <= 255:
+                        ruta_archivo += chr(ch)
+                        stdscr.addstr(8, 2, ruta_archivo)
+                        stdscr.refresh()
+
 
             elif option == 4:
-                pass
+                
+
+                stdscr.clear()
+                stdscr.addstr(1, 2, "Modificar un archivo en la red CAN Bus", curses.A_BOLD)
+                stdscr.addstr(4, 2, "Indica la ruta absoluta del archivo que deseas modificar en la red:", COLOR_CYAN_BLACK)
+                current_dir = os.path.dirname(os.path.abspath(__file__))  # Obtener la ruta del directorio actual
+                stdscr.addstr(6, 2, "Ruta actual del directorio: ", COLOR_CYAN_BLACK)
+                stdscr.addstr(6 ,30, f"{current_dir}", COLOR_MAGENTA_BLACK)
+                stdscr.addstr(8, 2, ruta_archivo)
+                stdscr.refresh()
+                curses.curs_set(1)  # Mostrar el cursor para ingresar la ruta del archivo
+                
+                
+                while True:
+                    ch = stdscr.getch()
+
+                    if ch == 27:  # Tecla 'Esc' para volver al menú principal
+                        curses.curs_set(0)  # Ocultar el cursor
+                        break
+
+                    elif ch == 10:  # Tecla 'Enter' para confirmar la ruta del archivo
+                        
+
+
+                        stdscr.refresh()
+                        curses.curs_set(1)  # Mostrar el cursor
+                        stdscr.clear()
+                        stdscr.addstr(1, 2, "Modificar Trama CAN Bus", curses.A_BOLD)
+                        stdscr.addstr(3, 2, "Escribe el ID y pulsa TAB para escribir en el campo Datos", COLOR_CYAN_BLACK)
+                        stdscr.addstr(4, 2, "+-----+-------------------+", COLOR_GREEN_BLACK)
+                        stdscr.addstr(5, 2, "|  ID |       Datos       |", COLOR_GREEN_BLACK)
+                        stdscr.addstr(6, 2, "+-----+-------------------+", COLOR_GREEN_BLACK)
+                        stdscr.addstr(7, 2, "|     |                   |", COLOR_GREEN_BLACK)
+                        stdscr.addstr(8, 2, "+-----+-------------------+", COLOR_GREEN_BLACK)
+                        
+
+                        trama = ""
+                        id_input = ""
+                        data_input = ""
+                        id_mode = True
+
+                        while True:
+                            key = stdscr.getch()
+
+                            if key == 9:  # Tecla 'Tab' para cambiar entre ID y Datos
+                                id_mode = not id_mode
+
+                            elif key == 10:  # Tecla 'Enter' para confirmar los datos
+                                #trama = f"{id_input}#{data_input}"
+                                
+                                stdscr.clear()
+                                stdscr.addstr(1, 2, "Modificar Aparición en el Archivo CSV", curses.A_BOLD)
+                                stdscr.addstr(3, 2, "Introduce qué aparición quieres que se modifique (por defecto se modifica la primera):", COLOR_CYAN_BLACK)
+                                stdscr.refresh()
+                                curses.curs_set(1)  # Mostrar el cursor
+                                n_input = ""
+                                
+                                while True:
+                                    key = stdscr.getch()
+                                    
+                                    if key == 10:  # Tecla 'Enter' para confirmar la entrada
+                                        if n_input == "":
+                                            n = 1  # Valor por defecto
+                                        else:
+                                            try:
+                                                n = int(n_input)
+                                            except ValueError:
+                                                n = 1  # Valor por defecto si la entrada no es un número
+                                        break
+                                    
+                                    elif key == curses.KEY_BACKSPACE:  # Tecla 'Backspace' para borrar caracteres
+                                        if n_input:
+                                            n_input = n_input[:-1]
+                                            stdscr.move(4, 2 + len(n_input))
+                                            stdscr.clrtoeol()
+                                    
+                                    elif 48 <= key <= 57:  # Teclas numéricas (0-9)
+                                        n_input += chr(key)
+                                        stdscr.addch(4, 2 + len(n_input), key)
+
+                                    elif key == 27:  # Tecla 'Esc' para cancelar y usar el valor por defecto
+                                        n = 1
+                                        break
+
+
+                                # Reemplazar 'data_input' con 'new_data' en el archivo
+                                if replace_data_in_file(ruta_archivo, id_input, data_input, n):
+                                    stdscr.addstr(5, 2, "Archivo modificado con éxito.", COLOR_GREEN_BLACK)
+                                else:
+                                    stdscr.addstr(5, 2, "Error al modificar el archivo.", COLOR_RED_BLACK)
+                                stdscr.refresh()
+
+                                curses.curs_set(0)  # Ocultar el cursor
+                                stdscr.getch()
+
+                                break
+
+                            elif ch == 27:  # Tecla 'Esc' para volver al menú principal
+                                curses.curs_set(0)  # Ocultar el cursor
+                                break
+
+                            elif key == curses.KEY_BACKSPACE:  # Tecla 'Backspace' para borrar caracteres
+                                if id_mode:
+                                    if id_input:
+                                        id_input = id_input[:-1]
+                                        stdscr.move(7, 3 + len(id_input))
+                                        stdscr.clrtoeol()
+                                else:
+                                    if data_input:
+                                        data_input = data_input[:-1]
+                                        stdscr.move(7, 9 + len(data_input))
+                                        stdscr.clrtoeol()
+
+                            elif 0 <= key <= 255:
+                                if id_mode:
+                                    id_input += chr(key)
+                                    stdscr.addch(7, 3 + len(id_input), key)
+                                else:
+                                    data_input += chr(key)
+                                    stdscr.addch(7, 9 + len(data_input), key)
+
+                        curses.curs_set(0)  # Ocultar el cursor
+                        stdscr.getch()
+
+
+                    elif ch == curses.KEY_BACKSPACE:
+                        if ruta_archivo:
+                            ruta_archivo = ruta_archivo[:-1]
+                            stdscr.move(8, 2)  # Mover el cursor a la posición correcta
+                            stdscr.clrtoeol()  # Borrar la línea actual desde la posición del cursor
+                            stdscr.addstr(8, 2, ruta_archivo)  # Actualizar visualmente la ruta
+
+
+                    elif 0 <= ch <= 255:
+                        ruta_archivo += chr(ch)
+                        stdscr.addstr(8, 2, ruta_archivo)
+                        stdscr.refresh()
+
+
 
             elif option == 5:
             	break
