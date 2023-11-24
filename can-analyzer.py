@@ -178,13 +178,13 @@ def main(stdscr):
 
                             elif ch == curses.KEY_BACKSPACE:  # Tecla 'Backspace' para borrar caracteres
                                 interfaz_input = interfaz_input[:-1]
-                                stdscr.move(4, 12)  # Mover el cursor a la posición correcta
+                                stdscr.move(5, 12)  # Mover el cursor a la posición correcta
                                 stdscr.clrtoeol()  # Borrar la línea actual desde la posición del cursor
-                                stdscr.addstr(4, 12, interfaz_input)  # Actualizar visualmente la interfaz
+                                stdscr.addstr(5, 12, interfaz_input)  # Actualizar visualmente la interfaz
             
                             elif 0 <= ch <= 255:
                                 interfaz_input += chr(ch)
-                                stdscr.addstr(4, 12, interfaz_input)
+                                stdscr.addstr(5, 12, interfaz_input)
                                 stdscr.refresh()
 
                         if monitorizar_option == "Sí" and (atras == False):
@@ -367,7 +367,7 @@ def main(stdscr):
                     elif ch == 10:  # Tecla 'Enter' para confirmar la ruta del archivo
                         
                         stdscr.clear()
-                        stdscr.addstr(1, 2, "Monitorización de Tráfico CAN Bus", curses.A_BOLD)
+                        stdscr.addstr(1, 2, "Inyectar trama en la red CAN Bus", curses.A_BOLD)
                         stdscr.addstr(4, 2, "¿Qué interfaz vas a utilizar? (Por defecto vcan0):", COLOR_CYAN_BLACK)
                         stdscr.addstr(5, 2, "Interfaz:", COLOR_CYAN_BLACK)
                         curses.curs_set(1)
@@ -391,13 +391,13 @@ def main(stdscr):
 
                             elif ch == curses.KEY_BACKSPACE:  # Tecla 'Backspace' para borrar caracteres
                                 interfaz_input = interfaz_input[:-1]
-                                stdscr.move(4, 12)  # Mover el cursor a la posición correcta
+                                stdscr.move(5, 12)  # Mover el cursor a la posición correcta
                                 stdscr.clrtoeol()  # Borrar la línea actual desde la posición del cursor
-                                stdscr.addstr(4, 12, interfaz_input)  # Actualizar visualmente la interfaz
+                                stdscr.addstr(5, 12, interfaz_input)  # Actualizar visualmente la interfaz
             
                             elif 0 <= ch <= 255:
                                 interfaz_input += chr(ch)
-                                stdscr.addstr(4, 12, interfaz_input)
+                                stdscr.addstr(5, 12, interfaz_input)
                                 stdscr.refresh()
 
                         if not atras:
@@ -430,7 +430,7 @@ def main(stdscr):
                 # Lógica para la opción 3 (Inyectar Payload)
 
                 stdscr.clear()
-                stdscr.addstr(1, 2, "Monitorización de Tráfico CAN Bus", curses.A_BOLD)
+                stdscr.addstr(1, 2, "Inyectar archivo en la red CAN Bus", curses.A_BOLD)
                 stdscr.addstr(4, 2, "¿Qué interfaz vas a utilizar? (Por defecto vcan0):", COLOR_CYAN_BLACK)
                 stdscr.addstr(5, 2, "Interfaz:", COLOR_CYAN_BLACK)
                 curses.curs_set(1)
@@ -510,13 +510,13 @@ def main(stdscr):
 
                     elif ch == curses.KEY_BACKSPACE:  # Tecla 'Backspace' para borrar caracteres
                         interfaz_input = interfaz_input[:-1]
-                        stdscr.move(4, 12)  # Mover el cursor a la posición correcta
+                        stdscr.move(5, 12)  # Mover el cursor a la posición correcta
                         stdscr.clrtoeol()  # Borrar la línea actual desde la posición del cursor
-                        stdscr.addstr(4, 12, interfaz_input)  # Actualizar visualmente la interfaz
+                        stdscr.addstr(5, 12, interfaz_input)  # Actualizar visualmente la interfaz
 
                     elif 0 <= ch <= 255:
                         interfaz_input += chr(ch)
-                        stdscr.addstr(4, 12, interfaz_input)
+                        stdscr.addstr(5, 12, interfaz_input)
                         stdscr.refresh()
 
 
